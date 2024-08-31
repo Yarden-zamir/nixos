@@ -138,7 +138,6 @@
     xdg-utils # for keyring
     pass
     fd
-    kitty
     wget
     vlc
     git
