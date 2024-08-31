@@ -6,9 +6,22 @@
     [
       # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      <home-manager/nixos>
     ];
 
 
+  systemd.user.services.atuind = {
+    enable = true;
+
+    environment = {
+      ATUIN_LOG = "info";
+    };
+    serviceConfig = {
+      ExecStart = "${pkgs.atuin}/bin/atuin daemon";
+    };
+    after = [ "network.target" ];
+    wantedBy = [ "default.target" ];
+  };
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -30,6 +43,10 @@
   # services.xserver.desktopManager.pantheon.enable = true;
   services.xserver.displayManager.lightdm.enable = true;
   services.xserver.desktopManager.cinnamon.enable = true;
+
+
+  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.beta;
+  hardware.nvidia.open = false;
   services.xserver.videoDrivers = [ "nvidia" ];
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -49,26 +66,78 @@
     alsa.support32Bit = true;
     pulse.enable = true;
   };
-  services.keyd = {
-    enable = true;
-    keyboards = {
-      "default" = {
-        settings = {
-          main = {
-            capslock = "overload(control, esc)";
-            "`" = "exec(kitty --single-instance)";
-          };
-        };
-      };
-    };
-  };
-
+  # services.keyd = {
+  #   enable = true;
+  #   keyboards = {
+  #     "default" = {
+  #       settings = {
+  #         main = {
+  #           capslock = "overload(control, esc)";
+  #           "`" = "exec(kitty --single-instance)";
+  #         };
+  #       };
+  #     };
+  #   };
+  # };
+  programs.zsh.enable = true;
+  users.defaultUserShell = pkgs.zsh;
   users.users.yarden = {
     isNormalUser = true;
     description = "Yarden Zamir";
     extraGroups = [ "networkmanager" "wheel" ];
-    shell = pkgs.zsh;
+    useDefaultShell = true;
+    # ignoreShellProgramCheck = true;
+
     # packages = with pkgs; [];
+  };
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    users.yarden = { pkgs, ... }: {
+      home.packages = [ pkgs.atool pkgs.httpie ];
+      programs = {
+        atuin =  {
+          enable = true;
+        };
+        zsh ={
+          enable = true;
+          enableCompletion = true;
+          autosuggestion.enable = true;
+          syntaxHighlighting.enable = true;
+    plugins = [
+      {
+        # A prompt will appear the first time to configure it properly
+        # make sure to select MesloLGS NF as the font in Konsole
+        name = "powerlevel10k";
+        src = pkgs.zsh-powerlevel10k;
+        file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+      }
+            {
+              name = "fzf-tab";
+              src = pkgs.fetchFromGitHub {
+                owner = "Aloxaf";
+                repo = "fzf-tab";
+                rev = "c2b4aa5ad2532cca91f23908ac7f00efb7ff09c9";
+                sha256 = "1b4pksrc573aklk71dn2zikiymsvq19bgvamrdffpf7azpq6kxl2";
+              };
+            }
+            {
+            # will source zsh-autosuggestions.plugin.zsh
+            name = "zsh-autosuggestions";
+            src = pkgs.fetchFromGitHub {
+              owner = "zsh-users";
+              repo = "zsh-autosuggestions";
+              rev = "v0.4.0";
+              sha256 = "0z6i9wjjklb4lvr7zjhbphibsyx51psv50gm07mbb0kj9058j6kc";
+            };
+            }
+          ];
+      };};
+
+      # The state version is required and should stay at the version you
+      # originally installed.
+      home.stateVersion = "24.11";
+    };
   };
 
   programs.steam = {
@@ -85,19 +154,9 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  programs.zsh = {
-    enable = true;
-    #   autosuggestions.enable = true;
-
-    #   plugins = [
-    #     { name = "zsh-users/zsh-autosuggestions"; } # Simple plugin installation
-    #     { name = "romkatv/powerlevel10k"; tags = [ as:theme depth:1 ]; } # Installations with additional options. For the list of options, please refer to Zplug README.
-    #   ];
-  };
   environment.systemPackages = with pkgs; [
     zsh-powerlevel10k
     meslo-lgs-nf
-    # zsh
     google-chrome
     github-desktop
     nixpkgs-fmt
