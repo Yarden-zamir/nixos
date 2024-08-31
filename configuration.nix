@@ -104,6 +104,7 @@
           enableCompletion = true;
           autosuggestion.enable = true;
           syntaxHighlighting.enable = true;
+          initExtra = "source ~/.p10k.zsh";
     plugins = [
       {
         # A prompt will appear the first time to configure it properly
@@ -112,6 +113,11 @@
         src = pkgs.zsh-powerlevel10k;
         file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
       }
+            {
+              name = "powerlevel10k-config";
+              src = ./p10k;
+              file = "p10k.zsh";
+            }
             {
               name = "fzf-tab";
               src = pkgs.fetchFromGitHub {
