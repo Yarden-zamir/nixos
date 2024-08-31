@@ -4,7 +4,6 @@
 {
   imports =
     [
-      # Include the results of the hardware scan.
       ./hardware-configuration.nix
       <home-manager/nixos>
     ];
@@ -54,9 +53,6 @@
     variant = "";
   };
 
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
-
   # Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
@@ -66,19 +62,6 @@
     alsa.support32Bit = true;
     pulse.enable = true;
   };
-  # services.keyd = {
-  #   enable = true;
-  #   keyboards = {
-  #     "default" = {
-  #       settings = {
-  #         main = {
-  #           capslock = "overload(control, esc)";
-  #           "`" = "exec(kitty --single-instance)";
-  #         };
-  #       };
-  #     };
-  #   };
-  # };
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
   users.users.yarden = {
@@ -94,11 +77,8 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     users.yarden = { pkgs, ... }: {
-      home.packages = [ pkgs.atool pkgs.httpie ];
       programs = {
-        atuin =  {
-          enable = true;
-        };
+        atuin.enable = true;
         zsh ={
           enable = true;
           enableCompletion = true;
@@ -129,9 +109,6 @@
             }
           ];
       };};
-
-      # The state version is required and should stay at the version you
-      # originally installed.
       home.stateVersion = "24.11";
     };
   };
@@ -142,16 +119,16 @@
     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
 
   };
-  services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "yarden";
+  services.displayManager.autoLogin = {
+    enable = true;
+    user = "yarden";
+  };
 
-  # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment.systemPackages = with pkgs; [
     zsh-powerlevel10k
+    any-nix-shell
     meslo-lgs-nf
     google-chrome
     github-desktop
@@ -164,7 +141,6 @@
     kitty
     wget
     vlc
-    # beep
     git
     nixd
     nil
@@ -180,7 +156,5 @@
   # networking.firewall.allowedUDPPorts = [ ... ];
   networking.firewall.enable = false;
 
-
   system.stateVersion = "unstable";
-
 }
