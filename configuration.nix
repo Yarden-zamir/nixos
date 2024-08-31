@@ -3,7 +3,8 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [
+      # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
 
@@ -25,22 +26,11 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_IL";
 
-  # i18n.extraLocaleSettings = {
-  #   LC_ADDRESS = "en_IL.UTF-8";
-  #   LC_IDENTIFICATION = "en_IL.UTF-8";
-  #   LC_MEASUREMENT = "en_IL.UTF-8";
-  #   LC_MONETARY = "en_IL.UTF-8";
-  #   LC_NAME = "en_IL.UTF-8";
-  #   LC_NUMERIC = "en_IL.UTF-8";
-  #   LC_PAPER = "en_IL.UTF-8";
-  #   LC_TELEPHONE = "en_IL.UTF-8";
-  #   LC_TIME = "en_IL.UTF-8";
-  # };
-
   services.xserver.enable = true;
+  # services.xserver.desktopManager.pantheon.enable = true;
   services.xserver.displayManager.lightdm.enable = true;
   services.xserver.desktopManager.cinnamon.enable = true;
-
+  services.xserver.videoDrivers = [ "nvidia" ];
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
@@ -77,15 +67,16 @@
     isNormalUser = true;
     description = "Yarden Zamir";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [];
+    shell = pkgs.zsh;
+    # packages = with pkgs; [];
   };
 
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-  };
 
+  };
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "yarden";
 
@@ -94,40 +85,47 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
+  programs.zsh = {
+    enable = true;
+    #   autosuggestions.enable = true;
+
+    #   plugins = [
+    #     { name = "zsh-users/zsh-autosuggestions"; } # Simple plugin installation
+    #     { name = "romkatv/powerlevel10k"; tags = [ as:theme depth:1 ]; } # Installations with additional options. For the list of options, please refer to Zplug README.
+    #   ];
+  };
   environment.systemPackages = with pkgs; [
-      google-chrome
-      github-desktop
-      vscode
-      neovim
-      xdg-utils # for keyring
-      pass
-      fd
-      kitty
-      wget
-      vlc
-      git
-      nixd
-      nil
-      steam-run
-      cosmic-term
+    zsh-powerlevel10k
+    meslo-lgs-nf
+    # zsh
+    google-chrome
+    github-desktop
+    nixpkgs-fmt
+    vscode
+    neovim
+    xdg-utils # for keyring
+    pass
+    fd
+    kitty
+    wget
+    vlc
+    # beep
+    git
+    nixd
+    nil
+    steam-run
+    cosmic-term
+    fzf
   ];
-  # List services that you want to enable:
 
   services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
   networking.firewall.enable = false;
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.05"; # Did you read the comment?
 
+  system.stateVersion = "unstable";
 
 }
