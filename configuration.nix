@@ -38,20 +38,30 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_IL";
 
-  services.xserver.enable = true;
   # services.xserver.desktopManager.pantheon.enable = true;
-  services.xserver.displayManager.lightdm.enable = true;
-  services.xserver.desktopManager.cinnamon.enable = true;
-
-
-  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.beta;
-  hardware.nvidia.open = false;
-  services.xserver.videoDrivers = [ "nvidia" ];
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
+  services.xserver = {
+    xkb = {
+      layout = "us";
+      variant = "";
+    };
+    enable = true;
+    displayManager.lightdm.enable = true;
+    desktopManager.cinnamon.enable = true;
+    videoDrivers = [ "nvidia" ];
   };
+
+  hardware.nvidia = {
+    modesetting.enable = true;
+    powerManagement = {
+      enable = false;
+      finegrained = false; 
+    };
+    open = false;
+    nvidiaSettings = true;
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
+  };
+  hardware.graphics.enable = true;
+  # Configure keymap in X11
 
   # Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
@@ -113,11 +123,24 @@
     };
   };
 
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    stdenv.cc.cc
+    zlib
+    fuse3
+    icu
+    nss
+    openssl
+    curl
+    expat
+    SDL2
+    # ...
+  ];
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-
+    gamescopeSession.enable = true;
   };
   services.displayManager.autoLogin = {
     enable = true;
@@ -127,6 +150,7 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
+    protonup-qt
     zsh-powerlevel10k
     any-nix-shell
     meslo-lgs-nf
@@ -146,6 +170,7 @@
     steam-run
     cosmic-term
     fzf
+    # (callPackage ./mesen/package.nix {})
   ];
 
   services.openssh.enable = true;
